@@ -58,7 +58,7 @@ add_action('woocommerce_api_mgurush', function () {
 					'amount' => $order->get_total(),
 					'merchant_name' => $mgurush->settings['merchant_name'],
 					'merchant_code' => (int) $mgurush->settings['partner_code'],
-					'currency' => get_woocommerce_currency(),
+					'currency' => $order->get_currency(),
 					'txn_ref' => $refNumber,
 					'order_id' => $orderId
 				]
