@@ -5,6 +5,14 @@
  * Author: Chol Paul
  * Version: 0.1
  */
+
+add_action('woocommerce_order_status_changed', function ($orderId, $from, $to, $order) {
+    if ($order->get_meta('old_status')) {
+        update_post_meta($orderId, 'old_status', $from);
+    } else {
+        update_post_meta($orderId, 'old_status', 'pending');
+    }
+}, 10, 4);
  
 add_action('woocommerce_order_refunded', function ($orderId) {
 	$order = wc_get_order($orderId);
@@ -39,7 +47,13 @@ add_action('woocommerce_order_refunded', function ($orderId) {
 	]);
 	$response = curl_exec($curl);
 	curl_close($curl);
-	$order->add_order_note($response);
+	$data = json_decode($response);
+	if ($data->status->statusCode == 0) {
+	    $order->add_order_note('Successful refund from mGurush');
+	} else {
+	    $lastStatus = $order->get_meta('old_status');
+	    $order->update_status($lastStatus, 'Failed to refund from mGurush');
+	}
 	$order->save();
 });
 
